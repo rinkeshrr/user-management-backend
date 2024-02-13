@@ -6,6 +6,8 @@ const User = require('../models/userModel');
 
 const getDetails = async (req, res) => {
   const id = req.params.id;
+  const token = req.cookies.access_token;
+  // console.log('cookie_Token', token);
 
   try {
     // Retrieve employee details from MongoDB

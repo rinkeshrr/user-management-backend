@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 
 const uri = 'mongodb://localhost:27017/user_management'; // replace with your MongoDB connection string
-mongoose.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(uri);
 
 const db = mongoose.connection;
 

@@ -1,30 +1,21 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const exceljs = require('exceljs');
-const fs = require('fs');
-const path = require('path');
 const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 5000;
 require('./src/db/mongoose');
+const authenticateToken = require('./src/middleware/authenticate');
+// const Cookies = require('cookies');
+const cookieParser = require('cookie-parser');
 
+const corsOptions = {
+    origin: true, // Reflect the request origin
+    credentials: true, // Enable sending cookies across origins
+};
 app.use(bodyParser.json());
 app.use(cors()); // Enable CORS for all routes
-
-const filePath = path.join(__dirname, '/Book4.xlsx');
-
-if (!fs.existsSync(filePath)) {
-    const workbook = new exceljs.Workbook();
-    const sheet = workbook.addWorksheet('User Details');
-    sheet.addRow(['Name', 'Employee ID', 'Laptop Model', 'Mac Address', 'Registration Date', 'Last Updated Date', 'Status', "password"]);
-    workbook.xlsx.writeFile(filePath)
-      .then(() => {
-        console.log('Excel file created successfully:', filePath);
-      })
-      .catch((error) => {
-        console.error('Error creating Excel file:', error);
-      });
-  }
+app.use(cookieParser());
+app.use(cors(corsOptions));
 
 // Routes
 const registerRoute = require('./src/routes/register');
@@ -36,16 +27,16 @@ const updateRoute = require('./src/routes/update');
 const toggleStatusRoute = require('./src/routes/toggleStatus');
 const deleteRoute = require('./src/routes/delete');
 
-app.use('/api/user-register', registerRoute);
+app.use('/api/user-register', authenticateToken, registerRoute);
 app.use('/api/login', loginRoute);
-app.use('/api/device-details', deviceDetailsRoute);
-app.use('/api/user-details', userDetailsRoute);
-app.use('/api/all-users', allUsersRoute);
-app.use('/api/update-user', updateRoute);
-app.use('/api/toggle-status', toggleStatusRoute);
-app.use('/api/delete-user', deleteRoute);
+app.use('/api/device-details', authenticateToken, deviceDetailsRoute);
+app.use('/api/user-details', authenticateToken, userDetailsRoute);
+app.use('/api/all-users', authenticateToken, allUsersRoute);
+app.use('/api/update-user', authenticateToken, updateRoute);
+app.use('/api/toggle-status', authenticateToken, toggleStatusRoute);
+app.use('/api/delete-user', authenticateToken, deleteRoute);
 
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+    console.log(`Server is running on port ${PORT}`);
 });
 
